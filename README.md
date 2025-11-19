@@ -54,6 +54,17 @@ Calibrate each module so that black mat readings stay below the `EDGE_WHITE_THRE
 
 Once wired exactly as above, upload `sumo_luring.ino` to the Nano. The robot will spin in SEARCHING mode and follow the luring/presentation logic described in the sketch.
 
+## What the Robot Does (Step-by-Step)
+
+1. **SEARCHING** – Both motors spin in opposite directions so the robot slowly turns in place. It is “sweeping” the arena to find an opponent. This continues until either ultrasonic sensor reports an enemy within the detection range for multiple consecutive readings (to avoid reacting to noise).
+2. **LURE_LEFT or LURE_RIGHT** – Once the enemy is seen on one arm, the robot drifts forward while steering slightly toward the opposite side. This gentle pull encourages the opponent to chase it toward the closest arena edge. It keeps luring until the enemy gets within the “presentation” distance near the edge.
+3. **PRESENT_LEFT_ARM / PRESENT_RIGHT_ARM** – When the enemy is very close to the edge, the robot quickly pivots so the opposite arm faces the opponent. Presenting the opposite arm exposes the white edge directly behind the robot so the opponent is more likely to charge out of bounds.
+4. **WAIT_FOR_HIT** – After presenting an arm, the robot pauses and watches the ultrasonic sensor on that arm only. It waits up to one second for the enemy to commit. Sudden distance drops (≥20 cm) or extremely short readings (<12 cm) are treated as hits.
+5. **BACKING_UP** – If a hit is detected, the robot immediately reverses for 300 ms to break contact, then stops and returns to SEARCHING. If no hit happens within the timeout, it also returns to SEARCHING so it can try again.
+6. **EDGE OVERRIDE** – At any time, if any bottom IR sensor sees the white border, the robot aborts whatever it was doing, backs up for ~450 ms, turns for ~250 ms, and then resumes SEARCHING. This prevents accidental self-elimination.
+
+These steps repeat continuously so the robot keeps teasing the opponent toward the edge, presenting a trap, and recovering safely whenever contact or the border is detected.
+
 ## Uploading the Sketch Without Diff Artifacts
 
 1. Either clone this repository or open `sumo_luring.ino` in your browser and click **Raw** so you see only the sketch text.
